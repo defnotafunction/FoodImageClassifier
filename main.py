@@ -41,7 +41,7 @@ train_transform = transforms.Compose([
     transforms.Normalize([0.5]*3, [0.5]*3)
 ])
 
-# REGULAR TRANSFORM
+# REGULAR IMAGE TRANSFORM
 transform = transforms.Compose([
     transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
     transforms.Lambda(lambda img: img.convert("RGB")),
@@ -86,13 +86,33 @@ class CNN(nn.Module):
 
         return x
 
-def convert_image_file_to_tensor(file_path: str) -> torch.Tensor:
+def convert_image_file_to_tensor(file_path: str, train_mode=False) -> torch.Tensor:
+    """
+    Opens image file, returns a transformed tensor form.
+    
+    :param file_path: File path of image.
+    :param train_mode: Boolean if True applies a training version of a transformation otherwise applies the regular transformation.
+    :return: Image tensor of shape (3, 224, 224)
+    """
+
     img = Image.open(file_path)
-    img_tensor = train_transform(img)
+
+    if train_mode:
+        img_tensor = train_transform(img)
+    else:
+        img_tensor = transform(img)
 
     return img_tensor
 
-def get_fast_food_image_data(path) -> tuple[torch.Tensor, torch.Tensor]:
+def get_fast_food_image_data(path: str, train_mode=False) -> tuple[torch.Tensor, torch.Tensor]:
+    """
+    Iterates through image file in folder, transforms each image, returns Tensor of images with respective labels.
+    
+    :param file_path: File path of image.
+    :param train_mode: If true applies data augmentation transformations, otherwise applies standard transformations.
+    :return: 2D tensor of examples/transformed images, 1D tensor of labels.
+    """
+
     examples, labels = [], []
 
     for name in FOOD_NAMES:
@@ -101,7 +121,7 @@ def get_fast_food_image_data(path) -> tuple[torch.Tensor, torch.Tensor]:
 
         for file_name in files:
             file_path = os.path.join(food_path, file_name)
-            img_tensor = convert_image_file_to_tensor(file_path)
+            img_tensor = convert_image_file_to_tensor(file_path, train_mode=train_mode)
 
             examples.append(img_tensor)
             labels.append(FOOD_TO_IDX.get(name))
@@ -109,16 +129,26 @@ def get_fast_food_image_data(path) -> tuple[torch.Tensor, torch.Tensor]:
     return torch.stack(examples), torch.tensor(labels)
 
 def train_model(model: nn.Module, num_epochs: int) -> None:
-    train_examples, train_labels = get_fast_food_image_data(FAST_FOOD_TRAINING_PATH)
+    """
+    Trains given model for num_epochs epochs.
+    
+    :param model: A neural network of the torch.nn.Module class.
+    :param num_epochs: Number of epochs.
+    """
+
+    train_examples, train_labels = get_fast_food_image_data(FAST_FOOD_TRAINING_PATH, train_mode=True)
     dataset = TensorDataset(train_examples, train_labels)
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     train_loader = DataLoader(dataset, batch_size=32, shuffle=True)
 
+    model.train() # Training mode.
+    
     for i in range(num_epochs):
+        # TRAINING LOOP
         for batch_idx, (data, target) in enumerate(train_loader):
-            # TRAINING LOOP
+            # MOVE DATA TO GPU FOR ACCELERATION
             data, target = data.to(device), target.to(device)
             
             predictions = model(data)
@@ -135,11 +165,17 @@ def train_model(model: nn.Module, num_epochs: int) -> None:
                 torch.save(model.state_dict(), 'model.pth') 
                 print(f'Epoch {i+1}: Loss - {loss.item()} | Accuracy - {acc.item()} | Batch - {batch_idx}')
 
-def get_model_metrics(model):
-    model.eval()
+def get_model_metrics(model: nn.Module) -> None:
+    """
+    Prints out accuracy of model.
+    
+    :param model: A neural network of the torch.nn.Module class.
+    """
+
+    model.eval() # Evaluation mode.
 
     with torch.no_grad():
-        X_test, y_test = get_fast_food_image_data(FAST_FOOD_TESTING_PATH)
+        X_test, y_test = get_fast_food_image_data(FAST_FOOD_TESTING_PATH, train_mode=False)
         X_test = X_test.to(device)
         y_test = y_test.to(device)
 
@@ -149,10 +185,12 @@ def get_model_metrics(model):
 
         print(f'ACCURACY: {accuracy_score(y_test.cpu().numpy(), predictions.cpu().numpy())}')
 
+
+
 cnn = CNN().to(device)
 cnn.load_state_dict(torch.load('model.pth', weights_only=True))
 
-#train_model(cnn, 1000)
+train_model(cnn, 100)
 
 #torch.save(cnn.state_dict(), 'model.pth')
 
