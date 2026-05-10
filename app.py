@@ -10,7 +10,7 @@ def preprocess_image(image: Image.Image):
 @st.cache_resource
 def load_cnn():
     cnn = CNN()
-    cnn.load_state_dict(torch.load('model.pth', weights_only=True))
+    torch.load("model.pth", map_location=torch.device("cpu"))
     return cnn
 
 model = load_cnn()
