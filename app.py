@@ -9,7 +9,7 @@ def preprocess_image(image: Image.Image):
 
 @st.cache_resource
 def load_cnn():
-    cnn = CNN().to(device)
+    cnn = CNN()
     cnn.load_state_dict(torch.load('model.pth', weights_only=True))
     return cnn
 
@@ -42,7 +42,7 @@ with result_container:
 
             st.image(image, caption="Uploaded Image", use_container_width=True)
 
-            img_tensor = preprocess_image(image).to(device)
+            img_tensor = preprocess_image(image)
 
             with torch.no_grad():
                 output = model(img_tensor)
