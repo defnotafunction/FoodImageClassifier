@@ -85,6 +85,8 @@ class CNN(nn.Module):
         x = self.fc_layers(x)
 
         return x
+    
+
 
 def convert_image_file_to_tensor(file_path: str, train_mode=False) -> torch.Tensor:
     """
@@ -187,24 +189,22 @@ def get_model_metrics(model: nn.Module) -> None:
 
 
 
-cnn = CNN().to(device)
-cnn.load_state_dict(torch.load('model.pth', weights_only=True))
 
-train_model(cnn, 100)
+#train_model(cnn, 100)
 
 #torch.save(cnn.state_dict(), 'model.pth')
 
-cnn.eval()
-burger_image = os.path.join('burger.jpg')
-img = convert_image_file_to_tensor(burger_image)
 
-img = img.to(device)
-img = img.unsqueeze(0)
+#burger_image = os.path.join('burger.jpg')
+#img = convert_image_file_to_tensor(burger_image)
 
-with torch.no_grad():
-    output = cnn(img)
-    probabilities = torch.softmax(output, dim=1)
-    prediction = torch.argmax(probabilities, dim=1).item()
-    print(f'This is a {IDX_TO_FOOD.get(prediction)}')
+#img = img.to(device)
+#img = img.unsqueeze(0)
 
-get_model_metrics(cnn)
+#with torch.no_grad():
+#    output = cnn(img)
+#    probabilities = torch.softmax(output, dim=1)
+#    prediction = torch.argmax(probabilities, dim=1).item()
+#    print(f'This is a {IDX_TO_FOOD.get(prediction)}')
+
+#get_model_metrics(cnn)
