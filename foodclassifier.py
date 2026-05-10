@@ -9,9 +9,6 @@ from sklearn.metrics import accuracy_score
 torch.manual_seed(1)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-print(torch.cuda.is_available())
-print(torch.cuda.get_device_name(0))
-print(device)
 
 FAST_FOOD_TRAINING_PATH = os.path.join('FastFoodImages', 'Train')
 FAST_FOOD_TESTING_PATH = os.path.join('FastFoodImages', 'Test')
