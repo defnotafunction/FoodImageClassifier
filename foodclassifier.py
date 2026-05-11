@@ -186,22 +186,3 @@ def get_model_metrics(model: nn.Module) -> None:
 
 
 
-
-#train_model(cnn, 100)
-
-#torch.save(cnn.state_dict(), 'model.pth')
-
-
-#burger_image = os.path.join('burger.jpg')
-#img = convert_image_file_to_tensor(burger_image)
-
-#img = img.to(device)
-#img = img.unsqueeze(0)
-
-#with torch.no_grad():
-#    output = cnn(img)
-#    probabilities = torch.softmax(output, dim=1)
-#    prediction = torch.argmax(probabilities, dim=1).item()
-#    print(f'This is a {IDX_TO_FOOD.get(prediction)}')
-
-#get_model_metrics(cnn)
