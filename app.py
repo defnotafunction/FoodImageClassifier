@@ -57,5 +57,3 @@ with result_container:
 
         else:
             st.write("Hello there! The name's :green[Foodie].")
-
-
